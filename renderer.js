@@ -315,7 +315,7 @@ async function switchToProfile() {
             profilesData.current = selectedProfile;
             await ipcRenderer.invoke('save-profiles', profilesData);
 
-            showToast('配置已切换！请重启 Claude Code', 'success');
+            showToast('配置已切换！新开 Claude Code 窗口即生效', 'success');
             renderProfiles();
             await updateCurrentProfile();
         } else {

@@ -108,29 +108,29 @@ ipcMain.handle('get-current-config', async () => {
     }
 });
 
-// 切换配置
+// 切换配置（使用环境变量）
 ipcMain.handle('switch-config', async (event, profileName, profile) => {
     try {
-        const configFile = findConfigFile();
+        const { execSync } = require('child_process');
 
-        // 备份当前配置
-        if (fs.existsSync(configFile)) {
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-            const backupFile = path.join(path.dirname(configFile), `config.backup.${timestamp}.json`);
-            fs.copyFileSync(configFile, backupFile);
+        // 设置环境变量（Windows 系统级）
+        const commands = [
+            `[System.Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', '${profile.baseURL}', 'User')`,
+            `[System.Environment]::SetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', '${profile.apiKey}', 'User')`
+        ];
+
+        for (const cmd of commands) {
+            execSync(`powershell -Command "${cmd}"`, { encoding: 'utf8' });
         }
 
-        // 读取或创建配置
+        // 同时更新 config.json 文件（作为备份）
+        const configFile = findConfigFile();
         let currentConfig = {};
         if (fs.existsSync(configFile)) {
             currentConfig = JSON.parse(fs.readFileSync(configFile, 'utf8'));
         }
-
-        // 更新配置
         currentConfig.baseURL = profile.baseURL;
         currentConfig.apiKey = profile.apiKey;
-
-        // 保存配置
         fs.writeFileSync(configFile, JSON.stringify(currentConfig, null, 2), 'utf8');
 
         return { success: true, path: configFile };
