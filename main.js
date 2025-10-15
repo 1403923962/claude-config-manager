@@ -111,17 +111,13 @@ ipcMain.handle('get-current-config', async () => {
 // 切换配置（使用环境变量）
 ipcMain.handle('switch-config', async (event, profileName, profile) => {
     try {
-        const { execSync } = require('child_process');
+        const { exec } = require('child_process');
+        const { promisify } = require('util');
+        const execAsync = promisify(exec);
 
-        // 设置环境变量（Windows 系统级）
-        const commands = [
-            `[System.Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', '${profile.baseURL}', 'User')`,
-            `[System.Environment]::SetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', '${profile.apiKey}', 'User')`
-        ];
-
-        for (const cmd of commands) {
-            execSync(`powershell -Command "${cmd}"`, { encoding: 'utf8' });
-        }
+        // 使用 setx 命令设置环境变量（更快更可靠）
+        await execAsync(`setx ANTHROPIC_BASE_URL "${profile.baseURL}"`, { timeout: 5000 });
+        await execAsync(`setx ANTHROPIC_AUTH_TOKEN "${profile.apiKey}"`, { timeout: 5000 });
 
         // 同时更新 config.json 文件（作为备份）
         const configFile = findConfigFile();
