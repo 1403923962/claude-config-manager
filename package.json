@@ -1,0 +1,38 @@
+{
+  "name": "claude-config-manager",
+  "version": "2.0.0",
+  "description": "Claude Code 配置管理工具",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build": "electron-builder --win --x64"
+  },
+  "keywords": [
+    "claude",
+    "config",
+    "manager"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.claude.config.manager",
+    "productName": "Claude Config Manager",
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": "icon.png"
+    },
+    "portable": {
+      "artifactName": "ClaudeConfigManager-${version}-portable.exe"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  }
+}
