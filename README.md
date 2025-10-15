@@ -4,10 +4,24 @@
 
 ![Version](https://img.shields.io/badge/version-2.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
+[![GitHub release](https://img.shields.io/github/v/release/1403923962/claude-config-manager)](https://github.com/1403923962/claude-config-manager/releases)
+
+## 📥 下载
+
+**[📦 下载最新版本 v2.0.0](https://github.com/1403923962/claude-config-manager/releases/tag/v2.0.0)**
+
+或者从源码运行：
+```bash
+git clone https://github.com/1403923962/claude-config-manager.git
+cd claude-config-manager
+npm install
+npm start
+```
 
 ## ✨ 特性
 
 - 🚀 **可视化管理** - 炫酷的现代化 UI，支持配置的增删改查
+- ⚡ **切换即生效** - 新开 Claude Code 窗口立即使用新配置，无需重启
 - 🔄 **一键切换** - 快速在不同的 API 配置之间切换
 - 💾 **本地存储** - 所有配置安全地保存在本地 JSON 文件
 - 🎯 **简单易用** - 直观的界面，无需学习成本
