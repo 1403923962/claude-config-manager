@@ -164,9 +164,13 @@ npm run build
 
 项目使用 `electron-builder` 进行打包，配置为：
 
-- **格式**：Portable（便携版，无需安装）
-- **输出**：`dist/ClaudeConfigManager-2.0.0-portable.exe`
-- **平台**：Windows x64
+- **格式**：NSIS 安装包 + Portable（便携版）
+- **平台**：Windows x64 + ARM64
+- **输出文件**：
+  - `dist/ClaudeConfigManager-2.0.0-x64-Setup.exe` - x64 安装包
+  - `dist/ClaudeConfigManager-2.0.0-arm64-Setup.exe` - ARM64 安装包
+  - `dist/ClaudeConfigManager-2.0.0-x64-portable.exe` - x64 便携版
+  - `dist/ClaudeConfigManager-2.0.0-arm64-portable.exe` - ARM64 便携版
 
 ## 🤝 贡献
 
@@ -193,4 +197,4 @@ MIT License
 
 ---
 
-Made with ❤️ by Claude Code
+Made with ❤️ by Zhu Qixuan & Claude
