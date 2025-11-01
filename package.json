@@ -1,0 +1,12 @@
+{
+  "name": "claude-config-manager-tauri",
+  "version": "2.0.0",
+  "description": "ClaudeCode 配置管理工具 (Tauri版)",
+  "scripts": {
+    "dev": "cargo tauri dev",
+    "build": "cargo tauri build",
+    "build:debug": "cargo tauri build --debug"
+  },
+  "author": "Zhu Qixuan & Claude",
+  "license": "MIT"
+}

@@ -1,0 +1,30 @@
+# Rust
+/target
+/src-tauri/target
+**/*.rs.bk
+Cargo.lock
+
+# Node
+node_modules/
+package-lock.json
+
+# Build outputs
+/dist
+/src-tauri/target
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Tauri
+/src-tauri/target
+/src-tauri/WixTools
+
+# Logs
+*.log
