@@ -141,33 +141,80 @@ fn get_current_config() -> Result<ClaudeConfig, String> {
 
 #[tauri::command]
 async fn switch_config(_profile_name: String, profile: Profile) -> Result<String, String> {
-    // 1. 使用 setx 设置环境变量
+    // 1. 根据操作系统设置环境变量
     let base_url = profile.base_url.clone();
     let api_key = profile.api_key.clone();
 
-    // 设置 ANTHROPIC_BASE_URL
-    let output1 = Command::new("cmd")
-        .args(&["/C", "setx", "ANTHROPIC_BASE_URL", &base_url])
-        .output()
-        .map_err(|e| format!("执行 setx 命令失败: {}", e))?;
+    // Windows: 使用 setx 设置永久环境变量
+    #[cfg(target_os = "windows")]
+    {
+        // 设置 ANTHROPIC_BASE_URL
+        let output1 = Command::new("cmd")
+            .args(&["/C", "setx", "ANTHROPIC_BASE_URL", &base_url])
+            .output()
+            .map_err(|e| format!("执行 setx 命令失败: {}", e))?;
 
-    if !output1.status.success() {
-        return Err(format!("设置 ANTHROPIC_BASE_URL 失败: {}",
-            String::from_utf8_lossy(&output1.stderr)));
+        if !output1.status.success() {
+            return Err(format!("设置 ANTHROPIC_BASE_URL 失败: {}",
+                String::from_utf8_lossy(&output1.stderr)));
+        }
+
+        // 设置 ANTHROPIC_AUTH_TOKEN
+        let output2 = Command::new("cmd")
+            .args(&["/C", "setx", "ANTHROPIC_AUTH_TOKEN", &api_key])
+            .output()
+            .map_err(|e| format!("执行 setx 命令失败: {}", e))?;
+
+        if !output2.status.success() {
+            return Err(format!("设置 ANTHROPIC_AUTH_TOKEN 失败: {}",
+                String::from_utf8_lossy(&output2.stderr)));
+        }
     }
 
-    // 设置 ANTHROPIC_AUTH_TOKEN
-    let output2 = Command::new("cmd")
-        .args(&["/C", "setx", "ANTHROPIC_AUTH_TOKEN", &api_key])
-        .output()
-        .map_err(|e| format!("执行 setx 命令失败: {}", e))?;
+    // macOS: 写入 ~/.zshrc 文件
+    #[cfg(target_os = "macos")]
+    {
+        use std::env;
 
-    if !output2.status.success() {
-        return Err(format!("设置 ANTHROPIC_AUTH_TOKEN 失败: {}",
-            String::from_utf8_lossy(&output2.stderr)));
+        // 获取用户主目录
+        let home = env::var("HOME").map_err(|_| "无法获取用户主目录".to_string())?;
+        let zshrc_path = format!("{}/.zshrc", home);
+
+        // 读取现有的 .zshrc 内容
+        let existing_content = fs::read_to_string(&zshrc_path).unwrap_or_default();
+
+        // 过滤掉旧的 ANTHROPIC 环境变量配置
+        let filtered_lines: Vec<String> = existing_content
+            .lines()
+            .filter(|line| {
+                !line.contains("ANTHROPIC_BASE_URL")
+                && !line.contains("ANTHROPIC_AUTH_TOKEN")
+            })
+            .map(|s| s.to_string())
+            .collect();
+
+        // 添加新的配置
+        let mut new_content = filtered_lines.join("\n");
+        if !new_content.is_empty() && !new_content.ends_with('\n') {
+            new_content.push('\n');
+        }
+        new_content.push_str(&format!("export ANTHROPIC_BASE_URL=\"{}\"\n", base_url));
+        new_content.push_str(&format!("export ANTHROPIC_AUTH_TOKEN=\"{}\"\n", api_key));
+
+        // 写回 .zshrc
+        fs::write(&zshrc_path, new_content)
+            .map_err(|e| format!("写入 .zshrc 失败: {}", e))?;
     }
 
-    // 2. 同时更新 config.json 文件作为备份
+    // Linux: 使用 export 设置环境变量（当前会话）
+    #[cfg(target_os = "linux")]
+    {
+        // 注意: export 只对当前进程有效，主要依赖配置文件
+        std::env::set_var("ANTHROPIC_BASE_URL", &base_url);
+        std::env::set_var("ANTHROPIC_AUTH_TOKEN", &api_key);
+    }
+
+    // 2. 更新 config.json 文件（所有平台通用，主要配置方式）
     if let Some(config_file) = find_config_file() {
         let mut current_config = if config_file.exists() {
             let content = fs::read_to_string(&config_file).unwrap_or_default();
